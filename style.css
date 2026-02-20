@@ -120,9 +120,11 @@ button {
   font-weight: bold;
 }
 
-footer {
-  background-color: #0b3d91;
-  color: white;
-  text-align: center;
-  padding: 15px;
+footer{
+background:#0d1b2a;
+color:white;
+padding:15px 5%;   /* Pehle 40px tha, ab kam kar diya */
+text-align:center;
+font-size:13px;
+line-height:1.6;
 }
