@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAAN Trust | Secure Donation</title>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI, sans-serif;
+background:#f4f7fb;
+}
+
+header{
+background:#0f172a;
+color:white;
+padding:15px 40px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+header a{
+background:#f59e0b;
+padding:8px 15px;
+color:white;
+text-decoration:none;
+border-radius:5px;
+}
+
+.hero{
+text-align:center;
+padding:60px 20px;
+background:linear-gradient(to right,#1e3a8a,#2563eb);
+color:white;
+}
+
+.container{
+background:white;
+max-width:400px;
+margin:40px auto;
+padding:30px;
+border-radius:10px;
+box-shadow:0 10px 25px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+input{
+padding:12px;
+width:90%;
+margin:10px 0;
+border:1px solid #ddd;
+border-radius:5px;
+}
+
+button{
+padding:12px 25px;
+background:#d4a017;
+color:white;
+border:none;
+cursor:pointer;
+border-radius:5px;
+font-size:16px;
+}
+
+button:hover{
+background:#b88b12;
+}
+
+footer{
+background:#0f172a;
+color:white;
+text-align:center;
+padding:20px;
+margin-top:40px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>DAAN Trust</h2>
+<a href="index.html">Home</a>
+</header>
+
+<section class="hero">
+<h1>Support Our Mission</h1>
+<p>Your contribution brings hope and change.</p>
+</section>
+
+<div class="container">
+
+<h2>Secure Donation</h2>
+
+<input type="text" id="name" placeholder="Your Name" required>
+<input type="email" id="email" placeholder="Your Email" required>
+<input type="number" id="amount" placeholder="Amount (INR)" required>
+
+<button onclick="payNow()">Donate Now</button>
+
+</div>
+
+<footer>
+<p>UDYAM-UP-10-0045590</p>
+<p>© 2026 DAAN Trust. All Rights Reserved.</p>
+</footer>
+
+<script>
+
+function generateReceiptNumber(){
+return "DAAN-" + Date.now();
+}
+
+function payNow(){
+
+let name=document.getElementById("name").value;
+let email=document.getElementById("email").value;
+let amount=document.getElementById("amount").value;
+
+if(!name||!email||!amount){
+alert("Please fill all fields");
+return;
+}
+
+let receiptNo=generateReceiptNumber();
+
+var options = {
+"key": "RAZORPAY_KEY_ID",  // 🔴 Apni Razorpay Key ID daalna
+"amount": amount*100,
+"currency": "INR",
+"name": "DAAN Trust",
+"description": "Donation",
+"handler": function (response){
+
+saveToSheet(name,email,amount,receiptNo,response.razorpay_payment_id);
+generatePDF(name,email,amount,receiptNo,response.razorpay_payment_id);
+
+alert("Payment Successful! Receipt Downloaded.");
+}
+};
+
+var rzp1 = new Razorpay(options);
+rzp1.open();
+}
+
+function generatePDF(name,email,amount,receiptNo,paymentId){
+
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+doc.setFontSize(16);
+doc.text("DAAN Trust Donation Receipt",20,20);
+
+doc.setFontSize(12);
+doc.text("Receipt No: "+receiptNo,20,40);
+doc.text("Name: "+name,20,50);
+doc.text("Email: "+email,20,60);
+doc.text("Amount: INR "+amount,20,70);
+doc.text("Payment ID: "+paymentId,20,80);
+doc.text("Udyam No: UDYAM-UP-10-0045590",20,100);
+
+doc.save("DAAN_Receipt_"+receiptNo+".pdf");
+}
+
+function saveToSheet(name,email,amount,receiptNo,paymentId){
+
+fetch("https://script.google.com/macros/s/AKfycbxUSNxPUn6U7NQiUd6e0A_cpW3lgqtmguK4JaLQSNKxzDx_HWwHPdIsgJwMyDwwTpGw/exec", {
+method: "POST",
+body: JSON.stringify({
+name:name,
+email:email,
+amount:amount,
+receipt:receiptNo,
+payment:paymentId
+}),
+headers:{
+"Content-Type":"application/json"
+}
+});
+
+}
+
+</script>
+
+</body>
+</html>
